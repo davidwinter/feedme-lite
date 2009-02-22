@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<project name="FeedMeLite" basedir="." default="main">
+    
+    <!-- Directory Variables -->
+    <property name="src.dir" value="src" />
+    <property name="build.dir" value="build" />
+	<property name="lib.dir" value="lib" />
+    <property name="classes.dir" value="${build.dir}/classes" />
+    <property name="jar.dir" value="${build.dir}/jar" />
+    <property name="i18n.dir" value="i18n" />
+        
+    <property name="JDIC.lib" value="${lib.dir}/jdic.jar" />
+    <property name="ROME.lib" value="${lib.dir}/rome-0.8.jar" />
+    <property name="JDOM.lib" value="${lib.dir}/jdom.jar" />
+    
+    <property name="libs" value="${JDIC.lib}; ${ROME.lib}; ${JDOM.lib}" />
+    
+    <!-- Main Class for the JAR file -->
+    <property name="main-class" value="feedmelite.FeedMeLite" />
+    
+    <!-- Clean everything up ready for new build -->
+    <target name="clean">
+        <delete dir="${build.dir}" />
+    </target>
+    
+    <!-- Compile Java files into build/classes directory -->
+    <target name="compile">
+        <mkdir dir="${classes.dir}" />
+        <javac srcdir="${src.dir}" destdir="${classes.dir}"
+             classpath="${libs}" />
+         <copy todir="${classes.dir}">
+             <fileset dir="${i18n.dir}"/>
+         </copy>
+    </target>
+    
+    <!-- Create JAR file based on .class files -->
+    <target name="jar" depends="compile">
+        <unjar src="${ROME.lib}" dest="${classes.dir}" />
+        <unjar src="${JDIC.lib}" dest="${classes.dir}" />
+        <unjar src="${JDOM.lib}" dest="${classes.dir}" />
+        <delete dir="${classes.dir}/META-INF" />
+        <mkdir dir="${jar.dir}" />
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}" />
+            </manifest>
+        </jar>
+    </target>
+    
+    <!-- Run JAR file -->
+    <target name="run" depends="jar">
+        <java jar="${jar.dir}/${ant.project.name}.jar" fork="true" />
+    </target>
+    
+    <!-- Shortcut for Build -->
+    <target name="clean-build" depends="clean, jar" />
+    
+    <!-- Shortcut for Run -->
+    <target name="main" depends="clean, run" />
+</project>
+
